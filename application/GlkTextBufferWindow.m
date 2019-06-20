@@ -1212,6 +1212,10 @@
     NSRange linkrange = NSMakeRange(0, 0);
     NSUInteger x;
 
+#if defined(MAC_OS_X_VERSION_10_8)
+    scrollview.magnification = 1.0;
+#endif
+
     [self storeScrollOffset];
     [super prefsDidChange];
 
@@ -2232,6 +2236,11 @@
         [[scrollview verticalScroller] setAlphaValue:100];
         scrollview.autohidesScrollers = YES;
         scrollview.borderType = NSNoBorder;
+#if defined(MAC_OS_X_VERSION_10_8)
+        scrollview.allowsMagnification = YES;
+        scrollview.maxMagnification = 16.0;
+        scrollview.minMagnification = 1.0;
+#endif
     }
 }
 
