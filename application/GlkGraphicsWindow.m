@@ -32,7 +32,6 @@
         dirty = YES;
         mouse_request = [decoder decodeBoolForKey:@"mouse_request"];
         transparent = [decoder decodeBoolForKey:@"transparent"];
-        bgnd = [decoder decodeIntegerForKey:@"bgnd"];
     }
     return self;
 }
@@ -42,7 +41,6 @@
     [encoder encodeObject:image forKey:@"image"];
     [encoder encodeBool:mouse_request forKey:@"mouse_request"];
     [encoder encodeBool:transparent forKey:@"transparent"];
-    [encoder encodeInteger:bgnd forKey:@"bgnd"];
 }
 
 - (BOOL)isOpaque {
@@ -57,19 +55,27 @@
 - (void)setBgColor:(NSInteger)bc {
     bgnd = bc;
 
-    //    NSLog(@"Background in graphics window was set to bgnd(%ld)",
-    //    (long)bgnd);
+//        NSLog(@"Background in graphics window was set to bgnd(%ld)",
+//        (long)bgnd);
 
     [self.glkctl setBorderColor:[self colorFromBgnd] fromWindow:self];
+    dirty = YES;
 }
 
 - (void)drawRect:(NSRect)rect {
     NSRect bounds = self.bounds;
 
+//    NSLog(@"drawRect in graphics window %ld. bgnd: %ld bounds: %@", self.name,
+//          (long)bgnd, NSStringFromRect(bounds));
+
     if (!transparent) {
         [[self colorFromBgnd] set];
-        NSRectFill(rect);
+    } else {
+        [[NSColor clearColor] set];
     }
+
+    NSRectFill(rect);
+
 
     [image drawAtPoint:bounds.origin
               fromRect:NSMakeRect(0, 0, bounds.size.width, bounds.size.height)
@@ -113,23 +119,6 @@
     dirty = YES;
 }
 
-- (NSColor *)colorFromBgnd {
-    NSColor *color = nil;
-    CGFloat r, g, b;
-
-    r = (bgnd >> 16) / 255.0;
-    g = (bgnd >> 8 & 0xFF) / 255.0;
-    b = (bgnd & 0xFF) / 255.0;
-
-    color = [NSColor colorWithCalibratedRed:r green:g blue:b alpha:1.0];
-    // NSLog(@"drawRect: Set color in graphics window to bgnd(%ld), %@",
-    // (long)bgnd, color);
-
-    if (!color)
-        color = [NSColor whiteColor];
-    return color;
-}
-
 - (void)fillRects:(struct fillrect *)rects count:(NSInteger)count {
     NSBitmapImageRep *bitmap;
     NSSize size;
@@ -139,6 +128,10 @@
     size = image.size;
 
     if (size.width == 0 || size.height == 0)
+        return;
+
+    NSSize screensize = self.window.screen.frame.size;
+    if (size.width > screensize.width * 2 || size.height > screensize.height * 2 )
         return;
 
     bitmap = [[NSBitmapImageRep alloc]
@@ -228,6 +221,7 @@
              val2:(NSInteger)y
             width:(NSInteger)w
            height:(NSInteger)h {
+
     NSSize srcsize = src.size;
 
     if (NSEqualSizes(image.size, NSZeroSize)) {
@@ -260,6 +254,7 @@
     [image unlockFocus];
 
     dirty = YES;
+
 }
 
 - (void)flushDisplay {

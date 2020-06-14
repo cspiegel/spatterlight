@@ -14,6 +14,7 @@
     self = [super init];
     if (self) {
         _startpos = location;
+        _range = NSMakeRange(location, 0);
     }
 
     return self;
@@ -34,17 +35,16 @@
     [encoder encodeObject:rangeVal forKey:@"range"];
 }
 
-- (NSDictionary *)reversedAttributes:(NSDictionary *)dict background:(NSColor *)backCol {
-    NSMutableDictionary *mutable = [dict mutableCopy];
++ (NSMutableDictionary *)reversedAttributes:(NSMutableDictionary *)dict background:(NSColor *)backCol {
     NSColor *fg = dict[NSForegroundColorAttributeName];
     NSColor *bg = dict[NSBackgroundColorAttributeName];
     if (!bg)
         bg = backCol;
     if (bg)
-        mutable[NSForegroundColorAttributeName] = bg;
+        dict[NSForegroundColorAttributeName] = bg;
     if (fg)
-        mutable[NSBackgroundColorAttributeName] = fg;
-    return mutable;
+        dict[NSBackgroundColorAttributeName] = fg;
+    return dict;
 }
 
 @end

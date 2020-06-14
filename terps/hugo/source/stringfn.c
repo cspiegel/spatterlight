@@ -72,6 +72,23 @@ static char *GetTempString(void)
 */
 
 
+
+void myStrcpy(char *dest, char *source)
+{
+    size_t sourceLen = strlen(source);
+    memcpy(dest, source, sourceLen);
+    * (dest + sourceLen) = '\0'; //null terminate
+}
+
+/* Sean Barrett wrote this routine to fix some strcpy problems
+ we saw when strcpy was used on overlapping strings. */
+char *hugo_strcpy(char *s, const char *t)
+{
+    char *r = s;
+    while ((*s++ = *t++) != 0) ;
+    return r;
+}
+
 /* LEFT */
 
 char *Left(char a[], int l)
@@ -104,9 +121,9 @@ char *Ltrim(char a[])
 #else
 	temp = &tempstring[0];
 #endif
-	strcpy(temp, a);
+	myStrcpy(temp, a);
 	while (temp[0]==' ' || temp[0]=='\t')
-		strcpy(temp, temp+1);
+		myStrcpy(temp, temp+1);
 	return temp;
 }
 
@@ -153,7 +170,6 @@ char *Right(char a[], int l)
 	return temp;
 }
 
-
 /* RTRIM */
 
 char *Rtrim(char a[])
@@ -166,10 +182,10 @@ char *Rtrim(char a[])
 #else
 	temp = &tempstring[0];
 #endif
-	strcpy(temp, a);
-	while (((len = strlen(temp))) && (temp[len-1]==' ' || temp[len-1]=='\t'))
-		strcpy(temp, Left(temp, len-1));
-	return temp;
+    myStrcpy(temp, a);
+    while (((len = strlen(temp))) && (temp[len-1]==' ' || temp[len-1]=='\t'))
+        myStrcpy(temp, Left(temp, len-1));
+    return temp;
 }
 
 
@@ -217,12 +233,3 @@ char *strupr(char *s)
 }
 
 #endif
-
-/* Sean Barrett wrote this routine to fix some strcpy problems 
-we saw when strcpy was used on overlapping strings. */
-char *hugo_strcpy(char *s, const char *t) 
-{ 
-	char *r = s; 
-	while ((*s++ = *t++) != 0) ; 
-	return r; 
-}

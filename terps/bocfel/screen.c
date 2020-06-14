@@ -696,7 +696,7 @@ static void update_delayed(void)
 
   if(delayed_window_shrink == -1 || upperwin->id == NULL) return;
 
-  glk_window_set_arrangement(glk_window_get_parent(upperwin->id), winmethod_Above | winmethod_Fixed, delayed_window_shrink, upperwin->id);
+  glk_window_set_arrangement(glk_window_get_parent(upperwin->id), winmethod_Above | winmethod_Fixed, (glui32)delayed_window_shrink, upperwin->id);
   upper_window_height = delayed_window_shrink;
 
   /* Glk might resize the window to a smaller height than was requested,
@@ -742,7 +742,10 @@ void cancel_all_events(void)
 static void resize_upper_window(long nlines)
 {
 #ifdef ZTERP_GLK
-  if(upperwin->id == NULL) return;
+    if(upperwin->id == NULL) {
+        upperwin->id = glk_window_open(mainwin->id,  winmethod_Above | winmethod_Fixed, (glui32)nlines, wintype_TextGrid, 0);
+    }
+//      return;
 
   long previous_height = upper_window_height;
 
@@ -1101,7 +1104,8 @@ static void set_cursor(uint16_t y, uint16_t x)
   if(x == 0) x = 1;
 
   /* This is actually illegal, but some games (e.g. Beyond Zork) expect it to work. */
-  if(y > upper_window_height) resize_upper_window(y);
+  if(y > upper_window_height)
+      resize_upper_window(y);
 
   if(upperwin->id != NULL)
   {

@@ -31,6 +31,10 @@ struct settings_struct
     float buffer_cell_width;
     float buffer_cell_height;
     float leading;
+    uint32_t fg;
+    uint32_t bg;
+    uint32_t sfg;
+    uint32_t sbg;
     int force_arrange;
 };
 

@@ -1,3 +1,5 @@
+#include <errno.h>
+
 #include "glkimp.h"
 #include "protocol.h"
 
@@ -46,6 +48,12 @@ float gbufcellw = 8;
 float gbufcellh = 12;
 float gleading = 0;
 
+uint32_t gfgcol = 0;
+uint32_t gbgcol = 0;
+uint32_t gsfgcol = 0;
+uint32_t gsbgcol = 0;
+
+
 glui32 lasteventtype = -1;
 
 void sendmsg(int cmd, int a1, int a2, int a3, int a4, int a5, size_t len, char *buf)
@@ -89,7 +97,7 @@ void readmsg(struct message *msgbuf, char *buf)
     n = read(readfd, msgbuf, sizeof (struct message));
     if (msgbuf->cmd == ERROR || n != sizeof (struct message))
     {
-        fprintf(stderr, "protocol error. exiting.\n");
+        fprintf(stderr, "protocol error. exiting. errno: %d\n", errno);
         exit(1);
     }
 
@@ -98,7 +106,7 @@ void readmsg(struct message *msgbuf, char *buf)
         n = read(readfd, buf, msgbuf->len);
         if (n != msgbuf->len)
         {
-            fprintf(stderr, "protocol error. exiting.\n");
+            fprintf(stderr, "protocol error. exiting. errno: %d\n", errno);
             exit(1);
         }
     }
@@ -125,6 +133,7 @@ void win_hello(void)
     if (event.type != evtype_Arrange)
     {
         fprintf(stderr, "protocol handshake error\n");
+        fprintf(stderr, "Expected %d, got %d\n", evtype_Arrange, event.type);
         exit(1);
     }
 }
@@ -134,13 +143,13 @@ void win_flush(void)
     if (buffering == BUFNONE)
         return;
 
-    //	fprintf(stderr, "win_flush buf=%d len=%d win=%d\n", buffering, bufferlen, bufferwin);
 
     if (buffering == BUFPRINT)
     {
         sendmsg(PRINT, bufferwin, bufferatt, 0, 0, 0,
                 bufferlen * sizeof(unsigned short),
                 (char*)pbuf);
+//        fprintf(stderr, "win_flush string %s\n", (char *)pbuf);
     }
 
     if (buffering == BUFRECT)
@@ -183,7 +192,8 @@ void win_print(int name, int ch, int at)
 
 void win_unprint(int name, glui32 *s, int len)
 {
-
+    if (!len)
+        return;
     win_flush();
 
     glui32 ix;
@@ -224,6 +234,7 @@ void wintitle(void)
 
 void win_fillrect(int name, glui32 color, int x, int y, int w, int h)
 {
+    fprintf(stderr, " win_fillrect %d: color %x (%d) x:%d y:%d w:%d h%d\n", name, color, color, x,y,w,h);
     if (buffering == BUFPRINT)
         win_flush();
 
@@ -265,6 +276,27 @@ char *win_promptsave(int type)
 
 int win_newwin(int type)
 {
+//    fprintf(stderr, "win_newwin type: ");
+//    switch (type) {
+//        case wintype_TextBuffer:
+//            fprintf(stderr, "wintype_TextBuffer");
+//            break;
+//        case wintype_Pair:
+//            fprintf(stderr, "wintype_Pair");
+//            break;
+//        case wintype_Graphics:
+//            fprintf(stderr, "wintype_Graphics");
+//            break;
+//        case wintype_TextGrid:
+//            fprintf(stderr, "wintype_TextGrid");
+//            break;
+//        default:
+//            fprintf(stderr, "unhandled type");
+//            break;
+//    }
+//
+//    fprintf(stderr, "\n");
+
     int expected_peer;
     win_flush();
 
@@ -298,10 +330,30 @@ void win_delwin(int name)
 
 void win_sizewin(int name, int x0, int y0, int x1, int y1)
 {
+//    fprintf(stderr, "win_sizewin name: %d x0: %d y0: %d x1: %d y1: %d\n", name, x0, y0, x1, y1);
+
     win_flush();
+
+    /* The Hugo engine bypasses the internal Glk Window handling,
+     so we make sure that the window bbox has the correct values here */
+    
+    window_t *win = gli_window_for_peer(name);
+//
+//    if (win->bbox.x0 == x0 && win->bbox.y0 == y0 && win->bbox.x1 == x1 && win->bbox.y1 == y1) {
+//        fprintf(stderr, "Window bbox already set to those values.\n");
+//    } else {
+        win->bbox.x0 = x0;
+        win->bbox.y0 = y0;
+        win->bbox.x1 = x1;
+        win->bbox.y1 = y1;
+//    }
+
     /* The window size may have changed before the message reaches the
      window server, so we send (what this interpreter process thinks is)
      the screen width and height. */
+
+    if (y1 - y0 < gcellh)
+        fprintf(stderr, "win_sizewin: less than 1 char high\n");
     sizewin->x0 = x0;
     sizewin->y0 = y0;
     sizewin->x1 = x1;
@@ -327,6 +379,7 @@ void win_clear(int name)
 
 void win_moveto(int name, int x, int y)
 {
+//    fprintf(stderr, "win_moveto(%d, %d)\n", x, y);
     win_flush();
     sendmsg(MOVETO, name, x, y, 0, 0, 0, NULL);
 }
@@ -349,13 +402,26 @@ void win_cancelchar(int name)
     sendmsg(CANCELCHAR, name, 0, 0, 0, 0, 0, NULL);
 }
 
-void win_initline(int name, int cap, int len, glui32 *buf)
+void win_initline(int name, int cap, int len, void *buf)
 {
     win_flush();
 
+    window_t *win = gli_window_for_peer(name);
+
     glui32 ix;
-    for (ix=0; ix<len; ix++) {
-        pbuf[ix] = buf[ix];
+
+    if (win->line_request_uni) {
+        for (ix=0; ix<len; ix++) {
+            pbuf[ix] = ((glui32 *)buf)[ix];
+        }
+    } else {
+        // If this was not a unicode line event request,
+        // we convert to unicode here
+        for (ix=0; ix<len; ix++) {
+            pbuf[ix] = ((char *)buf)[ix];
+            if ( pbuf[ix] >= 0x100)
+                pbuf[ix] = '?';
+        }
     }
 
     sendmsg(INITLINE, name, cap, 0, 0, 0, len * sizeof(unsigned short), (char *)pbuf);
@@ -544,6 +610,8 @@ int win_style_measure(int name, int styl, int hint, glui32 *result)
 
 void win_setbgnd(int name, glui32 color)
 {
+    fprintf(stderr, "win_setbgnd name:%d color:0x%x (%d)\n", name, color, color);
+
     win_flush();
     sendmsg(SETBGND, name, (int)color, 0, 0, 0, 0, NULL);
 }
@@ -620,15 +688,19 @@ again:
             /* + 5 for default line fragment padding */
             if (gscreenw == settings->screen_width &&
                 gscreenh == settings->screen_height &&
-                gbuffermarginx == settings->buffer_margin_x + 5 &&
+                gbuffermarginx == settings->buffer_margin_x + 5 &&  // line fragment padding
                 gbuffermarginy == settings->buffer_margin_y &&
-                ggridmarginx == settings->grid_margin_x + 5 &&
+                ggridmarginx == settings->grid_margin_x + 5 &&  // line fragment padding
                 ggridmarginy == settings->grid_margin_y &&
                 gcellw == settings->cell_width &&
                 gcellh == settings->cell_height &&
                 gbufcellw == settings->buffer_cell_width &&
                 gbufcellh == settings->buffer_cell_height &&
 				gleading == settings->leading &&
+                gfgcol == settings->fg &&
+                gbgcol == settings->bg &&
+                gsfgcol == settings->sfg &&
+                gsbgcol == settings->sbg &&
                 settings->force_arrange == 0)
                 goto again;
 
@@ -636,26 +708,33 @@ again:
             
             gscreenw = settings->screen_width;
             gscreenh = settings->screen_height;
-            gbuffermarginx = settings->buffer_margin_x + 5;
+            gbuffermarginx = settings->buffer_margin_x + 5; // line fragment padding
             gbuffermarginy = settings->buffer_margin_y;
-            ggridmarginx = settings->grid_margin_x + 5;
+            ggridmarginx = settings->grid_margin_x + 5;  // line fragment padding
             ggridmarginy = settings->grid_margin_y;
             gcellw = settings->cell_width;
             gcellh = settings->cell_height;
             gbufcellw = settings->buffer_cell_width;
             gbufcellh = settings->buffer_cell_height;
             gleading = settings->leading;
+            gfgcol = settings->fg;
+            gbgcol = settings->bg;
+            gsfgcol = settings->sfg;
+            gsbgcol = settings->sbg;
 
             gli_windows_rearrange();
             break;
 
         case EVTLINE:
 #ifdef DEBUG
-            //fprintf(stderr, "line input event\n");
+            fprintf(stderr, "line input event\n");
 #endif
+            fprintf(stderr, "line input event\n");
 
             event->type = evtype_LineInput;
             event->win = gli_window_for_peer(wmsg.a1);
+
+            fprintf(stderr, "line input event: window %d, wmsg.a2: %d \n", event->win->peer,  wmsg.a2);
 
             if (event->win->line_request_uni)
             {

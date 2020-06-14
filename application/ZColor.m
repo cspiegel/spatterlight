@@ -10,13 +10,11 @@
 
 @implementation ZColor
 
-- (instancetype)initWithText:(NSInteger)fg background:(NSInteger)bg
-                  andLocation:(NSUInteger)location {
+- (instancetype)initWithText:(NSInteger)fg background:(NSInteger)bg {
     self = [super init];
     if (self) {
         _fg = fg;
         _bg = bg;
-        _startpos = location;
     }
 
     return self;
@@ -25,42 +23,38 @@
 - (instancetype)initWithCoder:(NSCoder *)decoder {
     _fg = [decoder decodeIntegerForKey:@"fg"];
     _bg = [decoder decodeIntegerForKey:@"bg"];
-    NSValue *rangeVal = [decoder decodeObjectForKey:@"range"];
-    _range = rangeVal.rangeValue;
-    _index = (NSUInteger)[decoder decodeIntegerForKey:@"index"];
-    _startpos = (NSUInteger)[decoder decodeIntegerForKey:@"startpos"];
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
-    [encoder encodeInteger:(NSInteger)_index forKey:@"index"];
-    [encoder encodeInteger:(NSInteger)_startpos forKey:@"startpos"];
     [encoder encodeInteger:_fg forKey:@"fg"];
     [encoder encodeInteger:_bg forKey:@"bg"];
-    NSValue *rangeVal = [NSValue valueWithRange:_range];
-    [encoder encodeObject:rangeVal forKey:@"range"];
 }
 
-- (NSDictionary *)coloredAttributes:(NSDictionary *)dict {
-    NSMutableDictionary *mutable = [dict mutableCopy];
+- (NSMutableDictionary *)coloredAttributes:(NSMutableDictionary *)dict {
     if (_fg >= 0) {
-        mutable[NSForegroundColorAttributeName] = [self colorFromInteger:_fg];
+        dict[NSForegroundColorAttributeName] = [self colorFromInteger:_fg];
     }
+//    else {
+//        [dict removeObjectForKey:NSForegroundColorAttributeName];
+//    }
     if (_bg >= 0) {
-        mutable[NSBackgroundColorAttributeName] = [self colorFromInteger:_bg];
+        dict[NSBackgroundColorAttributeName] = [self colorFromInteger:_bg];
     }
-    return mutable;
+//    else {
+//        [dict removeObjectForKey:NSBackgroundColorAttributeName];
+//    }
+    return dict;
 }
 
-- (NSDictionary *)reversedAttributes:(NSDictionary *)dict {
-    NSMutableDictionary *mutable = [dict mutableCopy];
+- (NSMutableDictionary *)reversedAttributes:(NSMutableDictionary *)dict {
     if (_fg >= 0) {
-        mutable[NSBackgroundColorAttributeName] = [self colorFromInteger:_fg];
-    }
+        dict[NSBackgroundColorAttributeName] = [self colorFromInteger:_fg];
+    } 
     if (_bg >= 0) {
-        mutable[NSForegroundColorAttributeName] = [self colorFromInteger:_bg];
+        dict[NSForegroundColorAttributeName] = [self colorFromInteger:_bg];
     }
-    return mutable;
+    return dict;
 }
 
 - (NSColor *)colorFromInteger:(NSInteger)value {
@@ -75,8 +69,28 @@
 
 }
 
+- (NSString *)colorDescription:(NSInteger)value {
+    NSInteger r,g,b;
+    r = (value >> 16) & 0xff;
+    g = (value >> 8) & 0xff;
+    b = (value >> 0) & 0xff;
+
+    if (r > 250 && g > 250 && b > 250)
+        return @"white";
+
+    if (r < 2 && g < 2 && b < 2)
+        return @"black";
+
+    if (value == -1)
+        return @"zcolor_Default";
+    if (value == -2)
+        return @"zcolor_Current";
+
+    return [NSString stringWithFormat:@"0x%lx", (long)value];
+}
+
 - (NSString *)description {
-    return [NSString stringWithFormat:@"fg: %@ bg: %@", [self colorFromInteger:_fg], [self colorFromInteger:_bg]];
+    return [NSString stringWithFormat:@"fg: %@ bg: %@", [self colorDescription:_fg], [self colorDescription:_bg]];
 }
 
 @end

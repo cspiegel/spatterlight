@@ -19,14 +19,11 @@
     BOOL dirty;
     BOOL transparent;
 
-    NSUInteger lastStyle;
-
     NSTextView *fieldEditor;
     NSString *enteredTextSoFar;
 }
 
 @property NSRange restoredSelection;
-- (void)restoreSelection;
 
 - (BOOL)myMouseDown:(NSEvent *)theEvent;
 - (IBAction)speakStatus:(id)sender;

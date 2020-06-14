@@ -1,6 +1,5 @@
 #import "main.h"
 #import "ZColor.h"
-#import "ZReverseVideo.h"
 
 @implementation GlkWindow
 
@@ -12,6 +11,7 @@
         _glkctl = glkctl_;
         _theme = glkctl_.theme;
         _name = name;
+        bgnd = -1;
 
         _pendingTerminators = [[NSMutableDictionary alloc]
                                initWithObjectsAndKeys:@(NO), @keycode_Func1,
@@ -28,6 +28,8 @@
                                @(NO), @keycode_Func12,
                                @(NO),
                                @keycode_Escape, nil];
+
+        self.canDrawConcurrently = YES;
 
         currentTerminators = _pendingTerminators;
         _terminatorsPending = NO;
@@ -49,10 +51,9 @@
         char_request = [decoder decodeBoolForKey:@"char_request"];
         _styleHints = [decoder decodeObjectForKey:@"styleHints"];
         styles = [decoder decodeObjectForKey:@"styles"];
-        zColors = [decoder decodeObjectForKey:@"zColors"];
         currentZColor = [decoder decodeObjectForKey:@"currentZColor"];
-        reverseVideos = [decoder decodeObjectForKey:@"reverseVideos"];
-        currentReverseVideo = [decoder decodeObjectForKey:@"currentReverseVideo"];
+        currentReverseVideo = [decoder decodeBoolForKey:@"currentReverseVideo"];
+        bgnd = [decoder decodeIntegerForKey:@"bgnd"];
     }
     return self;
 }
@@ -69,10 +70,9 @@
     [encoder encodeBool:char_request forKey:@"char_request"];
     [encoder encodeObject:_styleHints forKey:@"styleHints"];
     [encoder encodeObject:styles forKey:@"styles"];
-    [encoder encodeObject:zColors forKey:@"zColors"];
     [encoder encodeObject:currentZColor forKey:@"currentZColor"];
-    [encoder encodeObject:reverseVideos forKey:@"reverseVideos"];
-    [encoder encodeObject:currentReverseVideo forKey:@"currentReverseVideo"];
+    [encoder encodeBool:currentReverseVideo forKey:@"currentReverseVideo"];
+    [encoder encodeInteger:bgnd forKey:@"bgnd"];
 }
 
 - (NSArray *)deepCopyOfStyleHintsArray:(NSArray *)array {
@@ -83,6 +83,32 @@
     return newArray;
 }
 
+- (NSColor *)colorFromBgnd {
+    NSColor *color = nil;
+    CGFloat r, g, b;
+
+    r = (bgnd >> 16) / 255.0;
+    g = (bgnd >> 8 & 0xFF) / 255.0;
+    b = (bgnd & 0xFF) / 255.0;
+
+    color = [NSColor colorWithCalibratedRed:r green:g blue:b alpha:1.0];
+
+    if (!color)
+        color = [NSColor whiteColor];
+    return color;
+}
+
+- (NSMutableDictionary *)reversedAttributes:(NSMutableDictionary *)dict background:(NSColor *)backCol {
+    NSColor *fg = dict[NSForegroundColorAttributeName];
+    NSColor *bg = dict[NSBackgroundColorAttributeName];
+    if (!bg)
+        bg = backCol;
+    if (bg)
+        dict[NSForegroundColorAttributeName] = bg;
+    if (fg)
+        dict[NSBackgroundColorAttributeName] = fg;
+    return dict;
+}
 
 - (BOOL)getStyleVal:(NSUInteger)style
                hint:(NSUInteger)hint
@@ -230,9 +256,6 @@
 
 - (BOOL)accessibilityIsIgnored {
     return NO;
-}
-
-- (void)restoreSelection {
 }
 
 @end

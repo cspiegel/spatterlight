@@ -126,7 +126,6 @@
 		6DB774D62458BAE400EDC671 /* libglkmain.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 961CCEB709F2396500528FF9 /* libglkmain.a */; };
 		6DB774D72458DD4900EDC671 /* bocfel in Copy Interpreter Files */ = {isa = PBXBuildFile; fileRef = 6DB774A22458B95E00EDC671 /* bocfel */; };
 		6DB8C1E924599DF9002CDCCB /* ZColor.m in Sources */ = {isa = PBXBuildFile; fileRef = 6DB8C1E824599DF8002CDCCB /* ZColor.m */; };
-		6DB8C1EC24599E33002CDCCB /* ZReverseVideo.m in Sources */ = {isa = PBXBuildFile; fileRef = 6DB8C1EB24599E33002CDCCB /* ZReverseVideo.m */; };
 		6DBC471A21D27E9C00A20E28 /* Compatibility.m in Sources */ = {isa = PBXBuildFile; fileRef = 6DBC471821D2752000A20E28 /* Compatibility.m */; };
 		6DBC629B23A421BE0066F443 /* Metadata.m in Sources */ = {isa = PBXBuildFile; fileRef = 6DC6214823A26078002DEF3B /* Metadata.m */; };
 		6DC520AA23BAD54B0004923A /* Game.m in Sources */ = {isa = PBXBuildFile; fileRef = 6DC520A923BAD54B0004923A /* Game.m */; };
@@ -1221,8 +1220,6 @@
 		6DB774BF2458B9B300EDC671 /* zterp.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = zterp.c; sourceTree = "<group>"; };
 		6DB8C1E724599DF8002CDCCB /* ZColor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZColor.h; sourceTree = "<group>"; };
 		6DB8C1E824599DF8002CDCCB /* ZColor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZColor.m; sourceTree = "<group>"; };
-		6DB8C1EA24599E33002CDCCB /* ZReverseVideo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZReverseVideo.h; sourceTree = "<group>"; };
-		6DB8C1EB24599E33002CDCCB /* ZReverseVideo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZReverseVideo.m; sourceTree = "<group>"; };
 		6DBC471721D270B100A20E28 /* Compatibility.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Compatibility.h; sourceTree = "<group>"; };
 		6DBC471821D2752000A20E28 /* Compatibility.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Compatibility.m; sourceTree = "<group>"; };
 		6DC144972215D3F6007C0A6B /* spatterstart.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = spatterstart.h; sourceTree = "<group>"; };
@@ -3474,12 +3471,12 @@
 				6DCFFC2D22BE57790035FA99 /* SideInfoView.m */,
 				96FBD8F40A0950EA002F6087 /* InfoController.h */,
 				96FBD8F50A0950EA002F6087 /* InfoController.m */,
-				96A9BB7A0A0662FA001B5B9B /* GlkController.h */,
-				C38101291EDA297E00B87B68 /* GlkController.m */,
 				961CCED909F239E700528FF9 /* GlkEvent.h */,
 				961CCEDA09F239E700528FF9 /* GlkEvent.m */,
 				6DF87CDA218259DB0020E9A1 /* GlkHyperlink.h */,
 				6DF87CDB218259DB0020E9A1 /* GlkHyperlink.m */,
+				96A9BB7A0A0662FA001B5B9B /* GlkController.h */,
+				C38101291EDA297E00B87B68 /* GlkController.m */,
 				961CCEE909F239E700528FF9 /* GlkWindow.h */,
 				961CCEEA09F239E700528FF9 /* GlkWindow.m */,
 				961CCEE509F239E700528FF9 /* GlkTextBufferWindow.h */,
@@ -3490,8 +3487,6 @@
 				961CCEDC09F239E700528FF9 /* GlkGraphicsWindow.m */,
 				6DB8C1E724599DF8002CDCCB /* ZColor.h */,
 				6DB8C1E824599DF8002CDCCB /* ZColor.m */,
-				6DB8C1EA24599E33002CDCCB /* ZReverseVideo.h */,
-				6DB8C1EB24599E33002CDCCB /* ZReverseVideo.m */,
 				6D85C894218BD6E00088D849 /* HelpPanelController.h */,
 				6D85C895218BD6E00088D849 /* HelpPanelController.m */,
 			);
@@ -5539,7 +5534,6 @@
 				6DD7679C23E45FB7003B605C /* ThemeArrayController.m in Sources */,
 				6DCDF48A244CD97100EB5D3B /* Spatterlight.xcdatamodeld in Sources */,
 				6DB8C1E924599DF9002CDCCB /* ZColor.m in Sources */,
-				6DB8C1EC24599E33002CDCCB /* ZReverseVideo.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6963,9 +6957,8 @@
 				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = (
 					"HUGO_INLINE=static\\ inline",
 					GLK,
-					COMPILE_V25,
-					NO_KEYPRESS_CURSOR,
 					SPATTERLIGHT,
+					PROMPTMORE_REPLACED,
 				);
 				INSTALL_PATH = "$(HOME)/bin";
 				OTHER_CFLAGS = "";
@@ -6985,9 +6978,8 @@
 				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = (
 					"HUGO_INLINE=static\\ inline",
 					GLK,
-					COMPILE_V25,
-					NO_KEYPRESS_CURSOR,
 					SPATTERLIGHT,
+					PROMPTMORE_REPLACED,
 				);
 				INSTALL_PATH = "$(HOME)/bin";
 				OTHER_CFLAGS = "";

@@ -245,7 +245,8 @@ fprintf(stderr, "%s\n",                                                    \
 
     self.window.representedFilename = _gamefile;
 
-    [_borderView setWantsLayer:YES];
+    _borderView.wantsLayer = YES;
+    _borderView.layerContentsRedrawPolicy = NSViewLayerContentsRedrawOnSetNeedsDisplay;
     [self setBorderColor:_theme.bufferBackground];
 
     if (_supportsAutorestore &&
@@ -1089,7 +1090,7 @@ fprintf(stderr, "%s\n",                                                    \
         [win flushDisplay];
 
     if (windowdirty) {
-        [_contentView setNeedsDisplay:YES];
+//        [_contentView setNeedsDisplay:YES];
         windowdirty = NO;
     }
 }
@@ -1312,6 +1313,7 @@ fprintf(stderr, "%s\n",                                                    \
 
 //    NSLog(@"GlkController for game %@ notePreferencesChanged", _game.metadata.title);
 
+    [self storeScrollOffsets];
     _shouldStoreScrollOffset = NO;
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"AdjustSize"]) {
         if (lastTheme != _theme && !NSEqualSizes(lastSizeInChars, NSZeroSize)) { // Theme changed
@@ -1800,7 +1802,7 @@ NSInteger colorToInteger(NSColor *color) {
     CGFloat r, g, b, a;
     uint32_t buf[3];
     NSInteger i;
-    color = [color colorUsingColorSpaceName:NSCalibratedRGBColorSpace];
+    color = [color colorUsingColorSpace:[NSColorSpace deviceRGBColorSpace]];
 
     [color getRed:&r green:&g blue:&b alpha:&a];
 
@@ -1812,18 +1814,29 @@ NSInteger colorToInteger(NSColor *color) {
     return i;
 }
 
+NSColor *integerToColor(NSInteger c) {
+    NSColor *color = nil;
+    CGFloat r, g, b;
+
+    r = (c >> 16) / 255.0;
+    g = (c >> 8 & 0xFF) / 255.0;
+    b = (c & 0xFF) / 255.0;
+
+    color = [NSColor colorWithCalibratedRed:r green:g blue:b alpha:1.0];
+
+    if (!color)
+        color = [NSColor whiteColor];
+    return color;
+}
+
 - (BOOL)handleStyleMeasureOnWin:(GlkWindow *)gwindow
                           style:(NSUInteger)style
                            hint:(NSUInteger)hint
                          result:(NSInteger *)result {
-//    if (styleuse[1][style_Normal][stylehint_TextColor])
-//        NSLog(@"styleuse[1][style_Normal][stylehint_TextColor] is true. "
-//              @"Value:%ld",
-//              (long)styleval[1][style_Normal][stylehint_TextColor]);
 
-    if ([gwindow getStyleVal:style hint:hint value:result])
+    if ([gwindow getStyleVal:style hint:hint value:result]) {
         return YES;
-    else {
+    } else {
         if (hint == stylehint_TextColor) {
             if ([gwindow isKindOfClass:[GlkTextBufferWindow class]])
                 *result = colorToInteger(_theme.bufferNormal.color);
@@ -2019,6 +2032,7 @@ NSInteger colorToInteger(NSColor *color) {
 
     NSInteger result;
     GlkWindow *reqWin = nil;
+    NSColor *bg = nil;
 
     if (req->a1 >= 0 && req->a1 < MAXWIN && _gwindows[@(req->a1)])
         reqWin = _gwindows[@(req->a1)];
@@ -2263,9 +2277,10 @@ NSInteger colorToInteger(NSColor *color) {
 
                 reqWin.autoresizingMask = hmask | vmask;
 
-                if ([reqWin isKindOfClass:[GlkTextBufferWindow class]])
-                     [(GlkTextBufferWindow *)reqWin recalcBackground];
-                windowdirty = YES;
+//                if ([reqWin isKindOfClass:[GlkTextBufferWindow class]]) {
+//                     [(GlkTextBufferWindow *)reqWin recalcBackground];
+//                }
+//                windowdirty = YES;
             } else
                 NSLog(@"sizwin: something went wrong.");
 
@@ -2279,14 +2294,15 @@ NSInteger colorToInteger(NSColor *color) {
             break;
 
         case SETBGND:
-            if (reqWin) {
-                if (![reqWin isKindOfClass:[GlkGraphicsWindow class]]) {
-                    NSLog(
-                          @"glkctl: SETBGND: ERROR win %d is not a graphics window.",
-                          req->a1);
-                    break;
-                }
+            if (req->a2 < 0)
+                bg = _theme.bufferBackground;
+            else
+                bg = integerToColor(req->a2);
+            if (req->a1 == -1) {
+                [self setBorderColor:bg];
+            }
 
+            if (reqWin) {
                 [reqWin setBgColor:req->a2];
             }
             break;
@@ -2462,11 +2478,11 @@ NSInteger colorToInteger(NSColor *color) {
             [self handleVolumeNotification:req->a3];
             break;
 
+#pragma mark Non-standard Glk extensions stuff
+
             /*
              * Hugo specifics (hugo doesn't use glk to arrange windows)
              */
-
-#pragma mark Non-standard Glk extensions stuff
 
         case MAKETRANSPARENT:
             if (reqWin)
@@ -2725,7 +2741,15 @@ again:
 }
 
 - (void)setBorderColor:(NSColor *)color fromWindow:(GlkWindow *)aWindow {
-//    NSLog(@"setBorderColor %@ fromWindow %ld", color, aWindow.name);
+//     NSLog(@"setBorderColor %@ fromWindow %ld", color, aWindow.name);
+
+    CGFloat relativeSize = (aWindow.bounds.size.width * aWindow.bounds.size.height) / (_contentView.bounds.size.width * _contentView.bounds.size.height);
+
+//    NSLog(@"relativeSize aWindow (%f) /  _contentView (%f) == %f", aWindow.bounds.size.width * aWindow.bounds.size.height, _contentView.bounds.size.width * _contentView.bounds.size.height,  relativeSize);
+
+     if (relativeSize < 0.75)
+         return;
+
     if (aWindow == [self largestWindow]) {
         [self setBorderColor:color];
     }
@@ -2733,14 +2757,17 @@ again:
 
 - (void)setBorderColor:(NSColor *)color {
     self.bgcolor = color;
-    CGFloat components[[color numberOfComponents]];
-    CGColorSpaceRef colorSpace = [[color colorSpace] CGColorSpace];
-    [color getComponents:(CGFloat *)&components];
-    CGColorRef cgcol = CGColorCreate(colorSpace, components);
+//    NSLog(@"GlkController setBorderColor: %@", color);
+    if (_theme.doStyles || colorToInteger(color) == colorToInteger(_theme.bufferBackground) || colorToInteger(color) == colorToInteger(_theme.gridBackground)) {
+        CGFloat components[[color numberOfComponents]];
+        CGColorSpaceRef colorSpace = [[color colorSpace] CGColorSpace];
+        [color getComponents:(CGFloat *)&components];
+        CGColorRef cgcol = CGColorCreate(colorSpace, components);
 
-    _borderView.layer.backgroundColor = cgcol;
-    self.window.backgroundColor = color;
-    CFRelease(cgcol);
+        _borderView.layer.backgroundColor = cgcol;
+        self.window.backgroundColor = color;
+        CFRelease(cgcol);
+    }
 }
 
 

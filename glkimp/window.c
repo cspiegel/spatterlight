@@ -862,7 +862,7 @@ void gli_windows_rearrange(void)
  * Input events
  */
 
-void gli_init_line_event(window_t *win, glui32 *buf, int maxlen, int initlen)
+void gli_init_line_event(window_t *win, void *buf, int maxlen, int initlen)
 {
     win_initline(win->peer, maxlen, initlen, buf);
 
@@ -963,7 +963,6 @@ void glk_request_line_event(window_t *win, char *buf, glui32 maxlen, glui32 init
             gli_strict_warning("request_line_event: window does not support keyboard input");
             break;
     }
-
 }
 
 void glk_request_char_event_uni(window_t *win)
@@ -1027,7 +1026,6 @@ void glk_request_line_event_uni(window_t *win, glui32 *buf, glui32 maxlen, glui3
             gli_strict_warning("request_line_event: window does not support keyboard input");
             break;
     }
-
 }
 
 void glk_set_echo_line_event(window_t *win, glui32 val)
@@ -1236,10 +1234,15 @@ void glk_window_clear(window_t *win)
             win_clear(win->peer);
             break;
         case wintype_Graphics:
-            win_fillrect(win->peer, win->background,
+        {
+            int background = win->background;
+            if (background == -1)
+                background = 0xffffff;
+            win_fillrect(win->peer, background,
                          0, 0,
                          win->bbox.x1 - win->bbox.x0,
                          win->bbox.y1 - win->bbox.y0);
+        }
             break;
     }
 }

@@ -32,6 +32,11 @@ extern float gcellh;
 extern float gbufcellw;
 extern float gbufcellh;
 extern float gleading;
+extern uint32_t gfgcol;
+extern uint32_t gbgcol;
+extern uint32_t gsfgcol;
+extern uint32_t gsbgcol;
+
 
 extern glui32 tagcounter;
 extern glui32 lasteventtype;
@@ -58,7 +63,7 @@ void win_maketransparent(int name);
 
 void win_initchar(int name);
 void win_cancelchar(int name);
-void win_initline(int name, int cap, int len, glui32 *buf);
+void win_initline(int name, int cap, int len, void *buf);
 void win_cancelline(int name, int cap, int *len, char *buf);
 void win_setlink(int name, int val);
 void win_initlink(int name);

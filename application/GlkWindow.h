@@ -5,11 +5,8 @@
     NSMutableArray *hyperlinks;
     GlkHyperlink *currentHyperlink;
 
-    NSMutableArray *zColors;
     ZColor *currentZColor;
-
-    NSMutableArray *reverseVideos;
-    ZReverseVideo *currentReverseVideo;
+    BOOL currentReverseVideo;
 
     NSMutableDictionary *currentTerminators;
 
@@ -19,6 +16,8 @@
     NSMutableArray *styles;
 
     BOOL char_request;
+
+    NSInteger bgnd;
 }
 
 @property(readonly) NSInteger name;
@@ -56,9 +55,11 @@
 - (void)setHyperlink:(NSUInteger)linkid;
 - (void)initHyperlink;
 - (void)cancelHyperlink;
+- (NSColor *)colorFromBgnd;
 
 - (void)setZColorText:(NSInteger)fg background:(NSInteger)bg;
 - (void)setReverseVideo:(BOOL)reverse;
+- (NSMutableDictionary *)reversedAttributes:(NSMutableDictionary *)dict background:(NSColor *)backCol;
 
 - (void)fillRects:(struct fillrect *)rects count:(NSInteger)n;
 - (void)drawImage:(NSImage *)buf
@@ -70,7 +71,5 @@
 - (void)prefsDidChange;
 - (void)terpDidStop;
 - (NSArray *)deepCopyOfStyleHintsArray:(NSArray *)array;
-
-- (void)restoreSelection;
 
 @end

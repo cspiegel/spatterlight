@@ -185,6 +185,22 @@ unsigned chartokeycode(unsigned ch) {
     return self;
 }
 
+-(NSInteger) colorToInteger:(NSColor *)color {
+    CGFloat r, g, b, a;
+    uint32_t buf[3];
+    NSInteger i;
+    color = [color colorUsingColorSpaceName:NSCalibratedRGBColorSpace];
+
+    [color getRed:&r green:&g blue:&b alpha:&a];
+
+    buf[0] = (uint32_t)(r * 255);
+    buf[1] = (uint32_t)(g * 255);
+    buf[2] = (uint32_t)(b * 255);
+
+    i = buf[2] + (buf[1] << 8) + (buf[0] << 16);
+    return i;
+}
+
 - (void)writeEvent:(NSInteger)fd {
     struct message reply;
     char buf[4096];
@@ -219,6 +235,10 @@ unsigned chartokeycode(unsigned ch) {
         settings->buffer_cell_width = (float)theme.bufferCellWidth;
         settings->buffer_cell_height = (float)theme.bufferCellHeight;
         settings->leading = (float)theme.gridNormal.lineSpacing;
+        settings->fg = [self colorToInteger:theme.bufferNormal.color];
+        settings->bg = [self colorToInteger:theme.bufferBackground];
+        settings->sfg = [self colorToInteger:theme.gridNormal.color];
+        settings->sbg = [self colorToInteger:theme.gridBackground];
         settings->force_arrange = _forced;
 
         reply.len = sizeof(struct settings_struct);

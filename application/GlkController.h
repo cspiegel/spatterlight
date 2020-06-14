@@ -146,4 +146,6 @@
 - (void)restoreScrollOffsets;
 - (void)adjustContentView;
 
+- (NSString *)debugString;
+
 @end
