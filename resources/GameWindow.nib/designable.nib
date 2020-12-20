@@ -10,6 +10,7 @@
             <connections>
                 <outlet property="borderView" destination="6" id="20"/>
                 <outlet property="contentView" destination="7" id="13"/>
+                <outlet property="scrollView" destination="9fZ-gj-Obs" id="HFB-hS-MBh"/>
                 <outlet property="window" destination="5" id="9"/>
             </connections>
         </customObject>
@@ -26,13 +27,31 @@
                 <rect key="frame" x="0.0" y="0.0" width="400" height="400"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7" customClass="GlkHelperView">
-                        <rect key="frame" x="0.0" y="0.0" width="400" height="400"/>
+                    <scrollView fixedFrame="YES" borderType="none" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" minMagnification="1" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9fZ-gj-Obs" customClass="ScalingScrollView">
+                        <rect key="frame" x="-1" y="-1" width="402" height="402"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <connections>
-                            <outlet property="glkctrl" destination="-2" id="21"/>
-                        </connections>
-                    </customView>
+                        <clipView key="contentView" id="ItT-0Q-4ur">
+                            <rect key="frame" x="0.0" y="0.0" width="402" height="402"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                            <subviews>
+                                <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7" customClass="GlkHelperView">
+                                    <rect key="frame" x="0.0" y="0.0" width="402" height="402"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <connections>
+                                        <outlet property="glkctrl" destination="-2" id="21"/>
+                                    </connections>
+                                </customView>
+                            </subviews>
+                        </clipView>
+                        <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="nqf-Ka-5Os">
+                            <rect key="frame" x="-100" y="-100" width="400" height="16"/>
+                            <autoresizingMask key="autoresizingMask"/>
+                        </scroller>
+                        <scroller key="verticalScroller" wantsLayer="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="56B-yx-J0E">
+                            <rect key="frame" x="386" y="0.0" width="16" height="402"/>
+                            <autoresizingMask key="autoresizingMask"/>
+                        </scroller>
+                    </scrollView>
                 </subviews>
             </view>
             <connections>
