@@ -8,9 +8,8 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="GlkController">
             <connections>
-                <outlet property="borderView" destination="6" id="20"/>
+                <outlet property="borderView" destination="9fZ-gj-Obs" id="fBc-vD-y8W"/>
                 <outlet property="contentView" destination="7" id="13"/>
-                <outlet property="scrollView" destination="9fZ-gj-Obs" id="HFB-hS-MBh"/>
                 <outlet property="window" destination="5" id="9"/>
             </connections>
         </customObject>
@@ -27,10 +26,10 @@
                 <rect key="frame" x="0.0" y="0.0" width="400" height="400"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <scrollView fixedFrame="YES" borderType="none" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" minMagnification="1" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9fZ-gj-Obs" customClass="ScalingScrollView">
+                    <scrollView fixedFrame="YES" borderType="none" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" allowsMagnification="YES" minMagnification="1" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9fZ-gj-Obs">
                         <rect key="frame" x="-1" y="-1" width="402" height="402"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <clipView key="contentView" id="ItT-0Q-4ur">
+                        <clipView key="contentView" translatesAutoresizingMaskIntoConstraints="NO" id="ItT-0Q-4ur">
                             <rect key="frame" x="0.0" y="0.0" width="402" height="402"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
@@ -56,7 +55,7 @@
             </view>
             <connections>
                 <outlet property="delegate" destination="-2" id="10"/>
-                <outlet property="initialFirstResponder" destination="7" id="11"/>
+                <outlet property="initialFirstResponder" destination="9fZ-gj-Obs" id="rz5-fw-JyO"/>
             </connections>
             <point key="canvasLocation" x="-142" y="114"/>
         </window>

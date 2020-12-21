@@ -76,9 +76,8 @@
 @property NSMutableDictionary *gwindows;
 @property NSMutableArray *windowsToBeAdded;
 @property NSMutableArray *windowsToBeRemoved;
-@property IBOutlet NSView *borderView;
+@property IBOutlet NSScrollView *borderView;
 @property IBOutlet GlkHelperView *contentView;
-@property IBOutlet ScalingScrollView *scrollView;
 
 // stylehints need to be copied to new windows, so we keep the values around
 
