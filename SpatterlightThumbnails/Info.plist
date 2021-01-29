@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>SpatterlightQuickLook</string>
+	<string>SpatterlightThumbnails</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -38,13 +38,13 @@
 				<string>org.tads.tads2-game</string>
 				<string>org.tads.tads3-game</string>
 			</array>
-			<key>QLSupportsSearchableItems</key>
-			<true/>
+			<key>QLThumbnailMinimumDimension</key>
+			<integer>128</integer>
 		</dict>
 		<key>NSExtensionPointIdentifier</key>
-		<string>com.apple.quicklook.preview</string>
+		<string>com.apple.quicklook.thumbnail</string>
 		<key>NSExtensionPrincipalClass</key>
-		<string>PreviewViewController</string>
+		<string>ThumbnailProvider</string>
 	</dict>
 </dict>
 </plist>
