@@ -7,6 +7,27 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface PreviewViewController : NSViewController
+@class Game, CoreDataManager;
+
+@interface PreviewViewController : NSViewController {
+    NSBox *topSpacer;
+    NSImageView *imageView;
+    NSTextField *titleField;
+    NSTextField *headlineField;
+    NSTextField *authorField;
+    NSTextField *blurbField;
+    NSTextField *ifidField;
+
+    CGFloat totalHeight;
+
+    NSMutableArray *ifidbuf;
+    NSMutableDictionary *metabuf;
+}
+
+//@property (readonly) CoreDataManager *coreDataManager;
+//@property (weak) NSManagedObjectContext *managedObjectContext;
+
+//@property (weak) Game *game;
+@property (weak) NSString *string;
 
 @end

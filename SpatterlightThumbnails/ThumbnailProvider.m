@@ -8,12 +8,13 @@
 #import "ThumbnailProvider.h"
 #import <Cocoa/Cocoa.h>
 
-#import "AppDelegate.h"
-#import "CoreDataManager.h"
-#import "Game.h"
-#import "Metadata.h"
-#import "Image.h"
+//#import "AppDelegate.h"
+//#import "CoreDataManager.h"
+//#import "Game.h"
+//#import "Metadata.h"
+//#import "Image.h"
 
+#import "ImageExtractor.h"
 #include <math.h>
 
 
@@ -22,40 +23,46 @@
 - (void)provideThumbnailForFileRequest:(QLFileThumbnailRequest *)request completionHandler:(void (^)(QLThumbnailReply * _Nullable, NSError * _Nullable))handler  API_AVAILABLE(macos(10.15)) API_AVAILABLE(macos(10.15)){
 
     // There are three ways to provide a thumbnail through a QLThumbnailReply. Only one of them should be used.
-
+    NSLog(@"provideThumbnailForFileRequest called");
     // First way: Draw the thumbnail into the current context, set up with AppKit's coordinate system.
     if (@available(macOS 10.15, *)) {
         handler([QLThumbnailReply replyWithContextSize:request.maximumSize currentContextDrawingBlock:^BOOL {
             // Draw the thumbnail here.
 
-            AppDelegate *appdel = (AppDelegate*)[NSApplication sharedApplication].delegate;
-            CoreDataManager *manager = appdel.coreDataManager;
-            NSManagedObjectContext *context = manager.mainManagedObjectContext;
-
+//            AppDelegate *appdel = (AppDelegate*)[NSApplication sharedApplication].delegate;
+//            CoreDataManager *manager = appdel.coreDataManager;
+//            NSManagedObjectContext *context = manager.mainManagedObjectContext;
+//
             NSURL *url = request.fileURL;
-
-            NSError *error = nil;
-            NSArray *fetchedObjects;
-
-            NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
-
-            fetchRequest.entity = [NSEntityDescription entityForName:@"Game" inManagedObjectContext:context];
-            fetchRequest.predicate = [NSPredicate predicateWithFormat:@"path like[c] %@", url.path];
-
-            fetchedObjects = [context executeFetchRequest:fetchRequest error:&error];
-            if (fetchedObjects == nil) {
-                NSLog(@"ThumbnailProvider: %@",error);
-                return NO;
+//
+//            NSError *error = nil;
+//            NSArray *fetchedObjects;
+//
+//            NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+//
+//            fetchRequest.entity = [NSEntityDescription entityForName:@"Game" inManagedObjectContext:context];
+//            fetchRequest.predicate = [NSPredicate predicateWithFormat:@"path like[c] %@", url.path];
+//
+//            fetchedObjects = [context executeFetchRequest:fetchRequest error:&error];
+//            if (fetchedObjects == nil) {
+//                NSLog(@"ThumbnailProvider: %@",error);
+//                return NO;
+//            }
+//
+//            if (fetchedObjects.count == 0) {
+//                NSLog(@"ThumbnailProvider: Found no Game object with with path %@", url.path);
+//                return NO;
+//            }
+//
+//            Game *game = fetchedObjects[0];
+//            
+//            NSImage *image = game.metadata.cover.data;
+            ImageExtractor *imageExtractor = [[ImageExtractor alloc] init];
+            NSImage *image = [imageExtractor extractImageFromFile:url.path];
+            if (!image) {
+                NSLog(@"image was nil");
+                return YES;
             }
-
-            if (fetchedObjects.count == 0) {
-                NSLog(@"ThumbnailProvider: Found no Game object with with path %@", url.path);
-                return NO;
-            }
-
-            Game *game = fetchedObjects[0];
-            
-            NSImage *image = game.metadata.cover.data;
             NSSize maximumSize = request.maximumSize;
             NSSize imageSize = [image size];
 

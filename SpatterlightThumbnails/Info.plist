@@ -39,7 +39,7 @@
 				<string>org.tads.tads3-game</string>
 			</array>
 			<key>QLThumbnailMinimumDimension</key>
-			<integer>128</integer>
+			<integer>64</integer>
 		</dict>
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.quicklook.thumbnail</string>
